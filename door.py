@@ -3,23 +3,25 @@ import RPi.GPIO as GPIO     ## Import GPIO library
 import time
 import os
 import sys
+import json
 
 class Door(object):
     """docstring for door."""
 
-    def __init__(self, sesion):
+    def __init__(self, session):
         self.DOOR_STATE = None  # the main variable for door state -- due to internall sensor o so
         self._SESSION = session
-        self.getDoorState()
         self.initDoor()
 
-    def sensorChange(self):
+    def sensorChange(self, foo):
         self.getDoorState()
+        print(self._SESSION)
         dt = {'action':'door-action', 'status': self.DOOR_STATE}
         try:
             self._SESSION.manager.broadcast(json.dumps(dt))
         except Exception as e:
             print(e)
+            print('no ta straca se stala tady dopice kurvaaaa')
 
     def initDoor(self):
         #   initialize door, get actual status of the door and set function for state changes due to hall sensor
@@ -28,6 +30,8 @@ class Door(object):
         GPIO.setup(18, GPIO.IN) # hall sensor setup
         GPIO.setup(14, GPIO.OUT)
         self.servo = GPIO.PWM(14, 50)  # pin 18, and 50 Hz
+        
+        self.getDoorState()
         self.servo.start(7.5) # set to neutral position - 7.5% duty cycle
         time.sleep(0.1)
         self.servo.ChangeDutyCycle(0)
@@ -38,7 +42,7 @@ class Door(object):
             self.unlock()
 
         # on update event
-        GPIO.add_event_detect(25, GPIO.BOTH, callback=self.sensorChange)
+        GPIO.add_event_detect(18, GPIO.BOTH, callback=self.sensorChange)
 
     def getDoorState(self):
         self.DOOR_STATE = GPIO.input(18) # True means locked, False mens unlocked

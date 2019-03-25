@@ -21,6 +21,7 @@ from door import Door
 
 _SESSION = None
 
+_DOOR = Door(_SESSION)
 async def websocket(msg, session):
     global _SESSION
     _SESSION = session
@@ -32,6 +33,7 @@ async def websocket(msg, session):
                 pass
         elif msg.tp == sockjs.MSG_OPEN:
             session.manager.broadcast(json.dumps({'action':'msg', 'text': 'Someone joined'}))
+            _DOOR._SESSION = session
 
         elif msg.tp == sockjs.MSG_MESSAGE:
             data = json.loads(msg.data)
@@ -47,7 +49,6 @@ path = os.path.join(os.path.dirname(__file__), 'templates')
 aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(path))
 
 # initialize door and setup all all we need for controll
-_DOOR = Door(_SESSION)
 
 ################################################################################
 # REQUESTS
@@ -65,8 +66,7 @@ async def main_page(request):
 async def door_state(request):
     print('bylo uspesne pozadano o to jake maj dvere status jou')
     # zones = _db.layers.get().fetchall()
-    door_status = False
-    return web.json_response({'status': door_status})
+    return web.json_response({'status': _DOOR.DOOR_STATE})
 
 @partial(app.router.add_post, '/_api/door-state')
 async def set_door_state(request):
@@ -93,6 +93,7 @@ if __name__ == '__main__':
     sockjs.add_endpoint(app, prefix='/sockjs', handler=websocket)
 
     handler = app.make_handler()
+    
     srv = loop.run_until_complete(
         loop.create_server(handler, '0.0.0.0', 80))
     print("Server started at http://0.0.0.0:80")
