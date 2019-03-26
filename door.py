@@ -12,6 +12,7 @@ class Door(object):
         self.DOOR_STATE = None  # the main variable for door state -- due to internall sensor o so
         self._SESSION = session
         self.initDoor()
+        self.last_button = time.now()
 
     def sensorChange(self, foo):
         self.getDoorState()
@@ -23,6 +24,17 @@ class Door(object):
             print(e)
             print('no ta straca se stala tady dopice kurvaaaa')
 
+    def buttonsHandler(self, foo):
+        if time.now() - self.last_button < 1:
+            return False
+        print('zmacknulo se tlacitko')
+        print(foo)
+        self.getDoorState()
+        if self.DOOR_STATE:
+            self.unlock()
+        else:
+            self.lock()
+
     def initDoor(self):
         #   initialize door, get actual status of the door and set function for state changes due to hall sensor
         GPIO.setmode(GPIO.BCM) ## Use board pin numbering
@@ -30,7 +42,10 @@ class Door(object):
         GPIO.setup(18, GPIO.IN) # hall sensor setup
         GPIO.setup(14, GPIO.OUT)
         self.servo = GPIO.PWM(14, 50)  # pin 18, and 50 Hz
-        
+        # buttons setting
+        GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(9, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
         self.getDoorState()
         self.servo.start(7.5) # set to neutral position - 7.5% duty cycle
         time.sleep(0.1)
@@ -43,6 +58,9 @@ class Door(object):
 
         # on update event
         GPIO.add_event_detect(18, GPIO.BOTH, callback=self.sensorChange)
+        # button events
+        GPIO.add_event_detect(11, GPIO.FALLING, callback=self.buttonsHandler)
+        GPIO.add_event_detect(9, GPIO.FALLING, callback=self.buttonsHandler)
 
     def getDoorState(self):
         self.DOOR_STATE = GPIO.input(18) # True means locked, False mens unlocked
