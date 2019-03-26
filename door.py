@@ -26,13 +26,13 @@ class Door(object):
             print('no ta straca se stala tady dopice kurvaaaa')
 
     def buttonsHandler(self, foo):
-        if self.button_trigger['first'] == 255:
+        if self.button_trigger['first'] == -1:
             return True # already in progress
 
         # manipulate with button handler, check old button progress and count number of peaks
         if self.button_trigger['first'] == 0:
             self.button_trigger['time'] = time.time()
-        elif time.time() - self.button_trigger['first']>.75:
+        elif time.time() - self.button_trigger['first']>.3:
             self.button_trigger['first'] = time.time()
             self.button_trigger['count'] = 0
             
@@ -40,11 +40,18 @@ class Door(object):
         if self.button_trigger['count'] <2:
             return True
 
-        if time.time() - self.last_button < 4:
+        if time.time() - self.last_button < 2:
             return False
 
-        self.button_trigger['first'] = 255
+        self.button_trigger['first'] = -1
         self.last_button = time.time()
+        # double check if is 0 -- means if is pressed
+        for i in range(3):
+            time.sleep(0.05)
+            if GPIO.input(foo):
+                self.button_trigger = {'first':0, 'count': 0}
+                return False
+
         if foo == 11:
             # yellow button which change the lock status after x second, during this w8, all buttons disabled
             time.sleep(8)
