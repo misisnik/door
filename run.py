@@ -13,6 +13,7 @@ from functools import partial
 from door import Door
 
 
+_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Database pro pokrocilejsi logovani
 # from models import Database
@@ -54,7 +55,7 @@ aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(path))
 # REQUESTS
 ################################################################################
 
-app.router.add_static('/static', 'static')
+app.router.add_static('/static', _PATH+'/static')
 
 # index
 @partial(app.router.add_get, '/')
@@ -95,8 +96,8 @@ if __name__ == '__main__':
     handler = app.make_handler()
     
     srv = loop.run_until_complete(
-        loop.create_server(handler, '0.0.0.0', 80))
-    print("Server started at http://0.0.0.0:80")
+        loop.create_server(handler, '0.0.0.0', 8080))
+    print("Server started at http://0.0.0.0:8080")
     # _db.device.insert('omron','omron',datetime.datetime.now().isoformat(), json.dumps([0,0]), json.dumps([]))
     # loop.create_task(olr.run())
 

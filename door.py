@@ -12,7 +12,8 @@ class Door(object):
         self.DOOR_STATE = None  # the main variable for door state -- due to internall sensor o so
         self._SESSION = session
         self.initDoor()
-        self.last_button = time.now()
+        self.last_button = time.time()
+        self.button_trigger = {'first': 0, 'count': 0}
 
     def sensorChange(self, foo):
         self.getDoorState()
@@ -25,15 +26,34 @@ class Door(object):
             print('no ta straca se stala tady dopice kurvaaaa')
 
     def buttonsHandler(self, foo):
-        if time.now() - self.last_button < 1:
+        if self.button_trigger['first'] == 255:
+            return True # already in progress
+
+        # manipulate with button handler, check old button progress and count number of peaks
+        if self.button_trigger['first'] == 0:
+            self.button_trigger['time'] = time.time()
+        elif time.time() - self.button_trigger['first']>.75:
+            self.button_trigger['first'] = time.time()
+            self.button_trigger['count'] = 0
+            
+        self.button_trigger['count'] += 1
+        if self.button_trigger['count'] <2:
+            return True
+
+        if time.time() - self.last_button < 4:
             return False
-        print('zmacknulo se tlacitko')
-        print(foo)
+
+        self.button_trigger['first'] = 255
+        self.last_button = time.time()
+        if foo == 11:
+            # yellow button which change the lock status after x second, during this w8, all buttons disabled
+            time.sleep(8)
         self.getDoorState()
         if self.DOOR_STATE:
             self.unlock()
         else:
             self.lock()
+        self.button_trigger = {'first':0, 'count': 0}
 
     def initDoor(self):
         #   initialize door, get actual status of the door and set function for state changes due to hall sensor
