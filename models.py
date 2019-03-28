@@ -28,7 +28,7 @@ class Database(object):
                 cur = db.cursor()
                 cur.execute("""CREATE TABLE events
                                 ( id INTEGER PRIMARY KEY AUTOINCREMENT
-                                , type          INTEGER
+                                , type          TEXT
                                 , dt            DATETIME) """)
 
                 cur.execute("""CREATE TABLE users
