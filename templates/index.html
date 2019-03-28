@@ -10,23 +10,7 @@
   </head>
   <body class="text-center">
     <div id="web-box" class="container-fluid" style="height:100vh;">
-      <!-- fakt jedoducha autentifikace pomoci vue. jako uplne nejtrivialnejsi jaka muze byt... proste to sem potom nejak dodej -->
-
-      <!-- template start here -->
-
-
-          <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-        <header class="masthead mb-auto">
-          <div class="inner">
-            <!-- <h3 class="masthead-brand">Automatic door opener jak svina</h3> -->
-            <!-- <nav class="nav nav-masthead justify-content-center">
-              <a class="nav-link active" href="#">Home</a>
-              <a class="nav-link" href="#">Features</a>
-              <a class="nav-link" href="#">Contact</a>
-            </nav> -->
-          </div>
-        </header>
-
+      <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
         <main role="main" class="inner cover">
           <h1 class="cover-heading">DOOR IS: <span v-if="door_state">Locked</span><span v-else>Unlocked</span></h1>
           <p class="lead">
@@ -36,7 +20,26 @@
               <a v-else href="#" class="btn btn-lg btn-danger" v-on:click="doorAction()"><span class="fas fa-chevron-right">Lock the door</a>
             </div>
           </p>
-        </main>
+          <div style="margin-top:50px;">
+            <hr>
+            <table class="table">
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">From</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for='da in data'>
+                  <th scope="row">${ da[0] }</th>
+                  <td>${ da[2] }</td>
+                  <td>${ da[1] }</td>
+                </tr>
+              </tbody>
+            </table>
+          </main>
+        </div>
 
         <footer class="mastfoot mt-auto">
 

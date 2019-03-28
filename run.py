@@ -11,18 +11,22 @@ import json
 import time
 from functools import partial
 from door import Door
-
+from beacon import Beacon
 
 _PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Database pro pokrocilejsi logovani
-# from models import Database
-# _db = Database()
-
+from models import Database
+_db = Database()
 
 _SESSION = None
+# class for actual gpio (door lock/unlock, and buttons controll)
+_DOOR = Door(_SESSION, _db)
+# # bluetooth beacon initialization
+# # BLE beacon scans will run in different thread
+_BEACON = Beacon(_DOOR)
+#_BEACON.start()
 
-_DOOR = Door(_SESSION)
 async def websocket(msg, session):
     global _SESSION
     _SESSION = session
@@ -66,8 +70,9 @@ async def main_page(request):
 @partial(app.router.add_get, '/_api/door-state')
 async def door_state(request):
     print('bylo uspesne pozadano o to jake maj dvere status jou')
+    dt = _db.events.getAll().fetchall()
     # zones = _db.layers.get().fetchall()
-    return web.json_response({'status': _DOOR.DOOR_STATE})
+    return web.json_response({'status': _DOOR.DOOR_STATE, 'data': dt})
 
 @partial(app.router.add_post, '/_api/door-state')
 async def set_door_state(request):
@@ -75,8 +80,8 @@ async def set_door_state(request):
     print('bylo upsesne pozadano o zmenu statusu')
     data = await request.json()
     print(data['status'])
-
-    dt = {'action':'loading', 'status': True}
+    dt = _db.events.getAll().fetchall()
+    dt = {'action':'loading', 'status': True, 'data': dt}
     try:
         _SESSION.manager.broadcast(json.dumps(dt))
     except Exception as e:
@@ -84,9 +89,9 @@ async def set_door_state(request):
 
     # do actual thing due to state
     if data['status']:
-        _DOOR.lock()
+        _DOOR.lock('Web')
     else:
-        _DOOR.unlock()
+        _DOOR.unlock('Web')
     # _db.layers.update(data['id'], position = json.dumps(data['position']))
     return web.json_response({'status': _DOOR.DOOR_STATE})
 
@@ -94,7 +99,7 @@ if __name__ == '__main__':
     sockjs.add_endpoint(app, prefix='/sockjs', handler=websocket)
 
     handler = app.make_handler()
-    
+
     srv = loop.run_until_complete(
         loop.create_server(handler, '0.0.0.0', 8080))
     print("Server started at http://0.0.0.0:8080")

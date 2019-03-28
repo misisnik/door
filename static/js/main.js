@@ -6,6 +6,7 @@ app = new Vue({
   el: '#web-box',
   data: {
     door_state: 'unknown',
+    data: [],
     loading: false,
   },
   methods: {
@@ -16,6 +17,7 @@ app = new Vue({
         this.$http.get(url).then((result) => {
             if(path == 'door-state'){
               app.door_state = result.body['status'];
+              app.data = result.body['data'];
             }else if(path == 'neco_dalsiho'){
               pass
             }
@@ -30,6 +32,7 @@ app = new Vue({
               // return na door action je jeslti se to povedlo nebo nepovedlo
               console.log(result.body['status']);
               app.door_state = result.body['status'];
+              app.data = result.body['data'];
             }
           }, err => {
               // handle error
@@ -84,6 +87,7 @@ connectWebSocket = function() {
         console.log('menime status na neco co nikdo nickdy nepoznal');
         console.log(data.status);
         app.loading = data.status;
+        // app.data = data.data;
       }
 
     };
