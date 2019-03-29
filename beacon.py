@@ -8,7 +8,6 @@ from bluepy import btle
 import time
 
 class ScanPrint(btle.DefaultDelegate):
-
     def __init__(self, rssi, door):
         btle.DefaultDelegate.__init__(self)
         self.rssi = rssi
@@ -25,7 +24,7 @@ class ScanPrint(btle.DefaultDelegate):
         if dt[3][2] != '18031993-1234-abcd-0000-222222222222':
             return False
         # this is it our key
-        if time.time() - self.old < 4:
+        if time.time() - self.old < 3:
             return False
         # ok muzem operovat!!!! teda otevira a zavirat vole ne
         self.old = time.time()
@@ -40,14 +39,14 @@ class Beacon(Thread):
 
     def __init__(self, door):
         self.door = door
-        self.run = True
+        self.run_thread= True
         Thread.__init__(self)
 
     def run(self):
         # actual run of beacon
         # btle.Debugging = arg.verbose
         scanner = btle.Scanner(0).withDelegate(ScanPrint(-85, self.door))
-        while self.run:
+        while self.run_thread:
             try:
                 scanner.scan(2)
             except Exception as e:

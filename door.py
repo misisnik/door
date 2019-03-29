@@ -140,7 +140,7 @@ class Door(object):
         time.sleep(1)
         self.getDoorState()
         # call database and add new insert, that lock event occured
-        self.database.events.insert("LOCK: "+from)
+        self._database.events.insert("LOCK: "+frm)
 
     def unlock(self, frm = 'Undefined'):
         if not self.DOOR_STATE:
@@ -151,7 +151,7 @@ class Door(object):
         time.sleep(1)
         self.getDoorState()
         # call database and add new insert, that Unlock event occured
-        self.database.events.insert("UNLOCK: "+from)
+        self._database.events.insert("UNLOCK: "+frm)
 
     def onexit(self):
         self.servo.stop
