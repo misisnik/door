@@ -25,7 +25,7 @@ _DOOR = Door(_SESSION, _db)
 # # bluetooth beacon initialization
 # # BLE beacon scans will run in different thread
 _BEACON = Beacon(_DOOR)
-#_BEACON.start()
+_BEACON.start()
 
 async def websocket(msg, session):
     global _SESSION
