@@ -56,23 +56,23 @@ class Door(object):
                 while 1:
                     val = GPIO.input(foo)
                     if val != level:
-                        if (time.time() - tt > (duration - around)) and (time.time() - tt > (duration + around)):
+                        if ((time.time() - tt) > (duration - around)) and ((time.time() - tt) < (duration + around)):
                             return True
                         else:
-                            IOError('Miss')
-                    elif time.time() - tt > duration +  around:
-                        IOError('Miss')
+                            raise IOError('Miss')
+                    elif (time.time() - tt) > (duration +  around):
+                        raise IOError('Miss')
                     else:
                         time.sleep(.005)
             # algorithm run
             try:
-                check(1,1)
                 check(0,.5)
-                check(1,1)
+                check(1,.5)
                 check(0,.5)
-                check(1,1)
+                check(1,.5)
                 check(0,.5)
-                check(1,3,1)
+                check(1,.5)
+                check(0,1.5,1)
             except IOError:
                 self.button_trigger = {'first':0, 'count': 0}
                 return False
